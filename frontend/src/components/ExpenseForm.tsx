@@ -3,10 +3,11 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { ExpenseFormData, Category } from "../types";
-import { TextField, SelectBox, Button, LoadingSpinner } from "../vibes";
+import { ExpenseFormData, Category, CategoryFormData } from "../types";
+import { TextField, SelectBox, Button, LoadingSpinner, Modal } from "../vibes";
 import { useExpenseForm } from "../hooks/useExpenseForm";
-import { fetchCategories } from "../services/api";
+import { fetchCategories, createCategory } from "../services/api";
+import { CategoryForm } from "./CategoryForm";
 
 interface ExpenseFormProps {
   initialData?: Partial<ExpenseFormData>;
@@ -23,6 +24,7 @@ export function ExpenseForm({
 }: ExpenseFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const { formData, errors, isSubmitting, handleChange, handleSubmit } =
     useExpenseForm({
@@ -77,16 +79,22 @@ export function ExpenseForm({
     }));
   
   const handleAddCategory = () => {
-    console.log("Add category clicked");
-    // Placeholder for future category management feature
-  }
+    setIsCategoryModalOpen(true);
+  };
+
+  const handleCategorySubmit = async (data: CategoryFormData) => {
+    await createCategory(data);
+    setIsCategoryModalOpen(false);
+    await loadCategories();
+  };
 
   if (isLoadingCategories) {
     return <LoadingSpinner />;
   }
 
   return (
-    <form onSubmit={handleSubmit} style={formStyle}>
+    <>
+      <form onSubmit={handleSubmit} style={formStyle}>
       <TextField
         label="Amount"
         type="number"
@@ -162,6 +170,18 @@ export function ExpenseForm({
           </Button>
         )}
       </div>
-    </form>
+      </form>
+
+      <Modal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        title="Add New Category"
+      >
+        <CategoryForm
+          onSubmit={handleCategorySubmit}
+          onCancel={() => setIsCategoryModalOpen(false)}
+        />
+      </Modal>
+    </>
   );
 }
