@@ -144,15 +144,6 @@ const HistoryPage: React.FC = () => {
     flexShrink: 0,
   };
 
-  const loadingStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "48px",
-    fontSize: "18px",
-    color: COLORS.secondary.s08,
-  };
-
   return (
     <div style={pageStyle}>
       <div style={headerStyle}>
