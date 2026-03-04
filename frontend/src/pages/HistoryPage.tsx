@@ -6,7 +6,7 @@ import { MonthNavigation } from "../components/MonthNavigation";
 import CategoryBreakdown from "../components/CategoryBreakdown";
 import { CalendarExpenseTable } from "../components/CalendarExpenseTable";
 import { ExpenseForm } from "../components/ExpenseForm";
-import { Modal, Button } from "../vibes";
+import { Modal, Button, LoadingSpinner } from "../vibes";
 import { COLORS } from "../constants/colors";
 
 const HistoryPage: React.FC = () => {
@@ -14,7 +14,7 @@ const HistoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [_loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Get year and month from URL params, default to current date if not provided
   const getInitialYearMonth = () => {
@@ -176,7 +176,7 @@ const HistoryPage: React.FC = () => {
 
       <div>
         {loading ? (
-          <div style={loadingStyle}>Loading...</div>
+          <LoadingSpinner />
         ) : (
           <>
             <CategoryBreakdown
@@ -201,12 +201,16 @@ const HistoryPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         title="Add New Expense"
       >
-        <ExpenseForm
-          categories={categories}
-          onSubmit={handleAddExpense}
-          onCancel={() => setIsModalOpen(false)}
-          onCategoryAdded={loadCategories}
-        />
+        {loadingCategories ? (
+          <LoadingSpinner />
+        ) : (
+          <ExpenseForm
+            categories={categories}
+            onSubmit={handleAddExpense}
+            onCancel={() => setIsModalOpen(false)}
+            onCategoryAdded={loadCategories}
+          />
+        )}
       </Modal>
     </div>
   );

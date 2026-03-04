@@ -31,6 +31,7 @@ export function CalendarExpenseTable({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const totalPages = Math.ceil(expenses.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -50,6 +51,7 @@ export function CalendarExpenseTable({
   const confirmDelete = async () => {
     if (!deletingExpense) return;
     try {
+      setIsDeleting(true);
       await deleteExpense(deletingExpense.id);
       setIsDeleteModalOpen(false);
       setDeletingExpense(null);
@@ -57,6 +59,8 @@ export function CalendarExpenseTable({
     } catch (error) {
       console.error("Failed to delete expense:", error);
       alert("Failed to delete expense");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -242,11 +246,12 @@ export function CalendarExpenseTable({
                 setIsDeleteModalOpen(false);
                 setDeletingExpense(null);
               }}
+              disabled={isDeleting}
             >
               Cancel
             </Button>
-            <Button variant="danger" onClick={confirmDelete}>
-              Delete
+            <Button variant="danger" onClick={confirmDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </div>
         </div>
