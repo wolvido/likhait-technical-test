@@ -89,6 +89,16 @@ export function ExpenseForm({
     await loadCategories();
   };
 
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const categoryName = e.target.value;
+    const selectedCategory = categories.find(c => c.name === categoryName);
+    
+    handleChange("category", categoryName);
+    if (selectedCategory) {
+      handleChange("category_id", selectedCategory.id.toString());
+    }
+  };
+
   if (isLoadingCategories) {
     return <LoadingSpinner />;
   }
@@ -125,7 +135,7 @@ export function ExpenseForm({
             label="Category"
             options={categoryOptions}
             value={formData.category}
-            onChange={(e) => handleChange("category", e.target.value)}
+            onChange={handleCategoryChange}
             error={errors.category}
             fullWidth
             required
