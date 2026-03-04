@@ -2,11 +2,11 @@
  * Form component for adding/editing expenses
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ExpenseFormData, Category, CategoryFormData } from "../types";
-import { TextField, SelectBox, Button, LoadingSpinner, Modal } from "../vibes";
+import { TextField, SelectBox, Button, Modal } from "../vibes";
 import { useExpenseForm } from "../hooks/useExpenseForm";
-import { fetchCategories, createCategory } from "../services/api";
+import { createCategory } from "../services/api";
 import { CategoryForm } from "./CategoryForm";
 
 interface ExpenseFormProps {
@@ -14,6 +14,8 @@ interface ExpenseFormProps {
   onSubmit: (data: ExpenseFormData) => Promise<void>;
   onCancel?: () => void;
   submitLabel?: string;
+  categories: Category[];
+  onCategoryAdded?: () => void;
 }
 
 export function ExpenseForm({
@@ -21,9 +23,9 @@ export function ExpenseForm({
   onSubmit,
   onCancel,
   submitLabel = "Add Expense",
+  categories,
+  onCategoryAdded,
 }: ExpenseFormProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const today = new Date().toISOString().split('T')[0];
 
@@ -33,21 +35,7 @@ export function ExpenseForm({
       onSubmit,
     });
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
-  const loadCategories = async () => {
-    try {
-      setIsLoadingCategories(true);
-      const data = await fetchCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error("Failed to load categories:", error);
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
 
   const formStyle: React.CSSProperties = {
     display: "flex",
@@ -86,7 +74,9 @@ export function ExpenseForm({
   const handleCategorySubmit = async (data: CategoryFormData) => {
     await createCategory(data);
     setIsCategoryModalOpen(false);
-    await loadCategories();
+    if (onCategoryAdded) {
+      onCategoryAdded();
+    }
   };
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -98,10 +88,6 @@ export function ExpenseForm({
       handleChange("category_id", selectedCategory.id.toString());
     }
   };
-
-  if (isLoadingCategories) {
-    return <LoadingSpinner />;
-  }
 
   return (
     <>
