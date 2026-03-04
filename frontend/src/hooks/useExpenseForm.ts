@@ -49,6 +49,12 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
       newErrors.date = "Date is required";
     }
 
+    // Validate date is not in the future
+    const today = new Date().toISOString().split('T')[0];
+    if (formData.date > today) {
+      newErrors.date = "Expenses can only be recorded for today or past dates. Future expenses are not allowed.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -73,6 +79,10 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
       setErrors({});
     } catch (error) {
       console.error("Form submission error:", error);
+      // Display backend error message
+      if (error instanceof Error) {
+        setErrors({ date: error.message });
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -25,6 +25,7 @@ export function ExpenseForm({
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const today = new Date().toISOString().split('T')[0];
 
   const { formData, errors, isSubmitting, handleChange, handleSubmit } =
     useExpenseForm({
@@ -94,7 +95,7 @@ export function ExpenseForm({
 
   return (
     <>
-      <form onSubmit={handleSubmit} style={formStyle}>
+      <form onSubmit={handleSubmit} style={formStyle} noValidate>
       <TextField
         label="Amount"
         type="number"
@@ -143,6 +144,7 @@ export function ExpenseForm({
       <TextField
         label="Date"
         type="date"
+        max={today}
         value={formData.date}
         onChange={(e) => handleChange("date", e.target.value)}
         error={errors.date}
