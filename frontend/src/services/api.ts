@@ -92,7 +92,9 @@ export async function createExpense(data: ExpenseFormData): Promise<Expense> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create expense");
+    const errorData = await response.json();
+    const errorMessage = errorData.errors?.join(", ") || "Failed to create expense";
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -114,7 +116,9 @@ export async function updateExpense(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to update expense");
+    const errorData = await response.json();
+    const errorMessage = errorData.errors?.join(", ") || "Failed to update expense";
+    throw new Error(errorMessage);
   }
 
   return response.json();
