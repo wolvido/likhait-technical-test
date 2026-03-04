@@ -37,13 +37,16 @@ export async function getExpenses(
  * Fetch all categories
  */
 export async function fetchCategories(): Promise<
-  Array<{ id: number; name: string }>
+  Array<{ id: number; name: string; created_at: string; updated_at: string }>
 > {
   const response = await fetch(`${API_BASE_URL}/categories`);
   if (!response.ok) {
     throw new Error("Failed to fetch categories");
   }
-  return response.json();
+  const categories = await response.json();
+  return categories.sort((a: any, b: any) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 }
 
 /**
