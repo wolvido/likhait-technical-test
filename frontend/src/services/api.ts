@@ -60,7 +60,9 @@ export async function createCategory(data: CategoryFormData): Promise<Category> 
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create category");
+    const errorData = await response.json();
+    const errorMessage = errorData.errors?.join(", ") || "Failed to create category";
+    throw new Error(errorMessage);
   }
 
   return response.json();

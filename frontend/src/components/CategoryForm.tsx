@@ -30,7 +30,7 @@ export function CategoryForm({ onSubmit, onCancel }: CategoryFormProps) {
       await onSubmit({ name: name.trim() });
       setName("");
     } catch (err) {
-      setError("Failed to create category");
+      setError(err instanceof Error ? err.message : "Failed to create category");
     } finally {
       setIsSubmitting(false);
     }
