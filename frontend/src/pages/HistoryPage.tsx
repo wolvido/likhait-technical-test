@@ -15,6 +15,8 @@ const HistoryPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Get year and month from URL params, default to current date if not provided
   const getInitialYearMonth = () => {
@@ -50,13 +52,14 @@ const HistoryPage: React.FC = () => {
 
   useEffect(() => {
     fetchExpenses();
-  }, [selectedYear, selectedMonth]);
+  }, [selectedYear, selectedMonth, currentPage]);
 
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const data = await getExpenses(selectedYear, selectedMonth);
-      setExpenses(data);
+      const data = await getExpenses(selectedYear, selectedMonth, currentPage);
+      setExpenses(data.expenses);
+      setTotalPages(data.total_pages);
     } catch (error) {
       console.error("Error fetching expenses:", error);
     } finally {
@@ -78,11 +81,13 @@ const HistoryPage: React.FC = () => {
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
+    setCurrentPage(1);
     updateURL(year, selectedMonth);
   };
 
   const handleMonthChange = (month: number) => {
     setSelectedMonth(month);
+    setCurrentPage(1);
     updateURL(selectedYear, month);
   };
 
@@ -90,6 +95,7 @@ const HistoryPage: React.FC = () => {
     try {
       await createExpense(data);
       setIsModalOpen(false);
+      setCurrentPage(1);
       fetchExpenses();
     } catch (error) {
       console.error("Error creating expense:", error);
@@ -181,6 +187,9 @@ const HistoryPage: React.FC = () => {
                 categories={categories}
                 onExpenseUpdated={fetchExpenses}
                 onCategoryAdded={loadCategories}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
               />
             </div>
           </>

@@ -50,6 +50,14 @@ export interface TopCategory {
   count: number;
 }
 
+export interface PaginatedExpensesResponse {
+  expenses: Expense[];
+  total_count: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
+}
+
 export interface DayExpenses {
   day: number;
   expenses: Expense[];

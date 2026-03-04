@@ -2,7 +2,7 @@
  * API service for communicating with the backend
  */
 
-import { Expense, ExpenseFormData, Category, CategoryFormData } from "../types";
+import { Expense, ExpenseFormData, Category, CategoryFormData, PaginatedExpensesResponse } from "../types";
 
 const API_BASE_URL = "http://localhost:3000/api";
 
@@ -18,14 +18,16 @@ export async function fetchExpenses(): Promise<Expense[]> {
 }
 
 /**
- * Fetch expenses for a specific year and month
+ * Fetch expenses for a specific year and month with pagination
  */
 export async function getExpenses(
   year: number,
   month: number,
-): Promise<Expense[]> {
+  page: number = 1,
+  perPage: number = 10,
+): Promise<PaginatedExpensesResponse> {
   const response = await fetch(
-    `${API_BASE_URL}/expenses?year=${year}&month=${month}`,
+    `${API_BASE_URL}/expenses?year=${year}&month=${month}&page=${page}&per_page=${perPage}`,
   );
   if (!response.ok) {
     throw new Error("Failed to fetch expenses");
