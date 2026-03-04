@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from "react";
-import { Expense, ExpenseFormData } from "../types";
+import { Expense, ExpenseFormData, Category } from "../types";
 import { formatCurrency, formatDate } from "../utils/expenseUtils";
 import { getCategoryEmoji } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
@@ -13,25 +13,28 @@ import { deleteExpense, updateExpense } from "../services/api";
 
 interface CalendarExpenseTableProps {
   expenses: Expense[];
+  categories: Category[];
   onExpenseUpdated: () => void;
+  onCategoryAdded: () => void;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
-
-const ITEMS_PER_PAGE = 10;
 
 export function CalendarExpenseTable({
   expenses,
+  categories,
   onExpenseUpdated,
+  onCategoryAdded,
+  currentPage,
+  totalPages,
+  onPageChange,
 }: CalendarExpenseTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const totalPages = Math.ceil(expenses.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentExpenses = expenses.slice(startIndex, endIndex);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = (expense: Expense) => {
     setEditingExpense(expense);
@@ -46,6 +49,7 @@ export function CalendarExpenseTable({
   const confirmDelete = async () => {
     if (!deletingExpense) return;
     try {
+      setIsDeleting(true);
       await deleteExpense(deletingExpense.id);
       setIsDeleteModalOpen(false);
       setDeletingExpense(null);
@@ -53,6 +57,8 @@ export function CalendarExpenseTable({
     } catch (error) {
       console.error("Failed to delete expense:", error);
       alert("Failed to delete expense");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -130,7 +136,7 @@ export function CalendarExpenseTable({
           </tr>
         </thead>
         <tbody>
-          {currentExpenses.map((expense) => (
+          {expenses.map((expense) => (
             <tr key={expense.id}>
               <td style={tdStyle}>{formatDate(new Date(expense.date))}</td>
               <td style={tdStyle}>{expense.description}</td>
@@ -175,7 +181,7 @@ export function CalendarExpenseTable({
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
+        onPageChange={onPageChange}
       />
 
       <Modal
@@ -188,10 +194,12 @@ export function CalendarExpenseTable({
       >
         {editingExpense && (
           <ExpenseForm
+            categories={categories}
             initialData={{
               amount: editingExpense.amount.toString(),
               description: editingExpense.description,
               category: editingExpense.category,
+              category_id: editingExpense.category_id, 
               date: formatDate(new Date(editingExpense.date)),
             }}
             onSubmit={handleUpdate}
@@ -199,6 +207,7 @@ export function CalendarExpenseTable({
               setIsEditModalOpen(false);
               setEditingExpense(null);
             }}
+            onCategoryAdded={onCategoryAdded}
             submitLabel="Update Expense"
           />
         )}
@@ -235,11 +244,12 @@ export function CalendarExpenseTable({
                 setIsDeleteModalOpen(false);
                 setDeletingExpense(null);
               }}
+              disabled={isDeleting}
             >
               Cancel
             </Button>
-            <Button variant="danger" onClick={confirmDelete}>
-              Delete
+            <Button variant="danger" onClick={confirmDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </div>
         </div>

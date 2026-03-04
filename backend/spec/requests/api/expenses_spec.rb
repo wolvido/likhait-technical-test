@@ -8,20 +8,34 @@ RSpec.describe "Api::Expenses", type: :request do
   let!(:expense1) { Expense.create!(description: "Lunch", amount: 100.00, category: food_category, date: Date.today - 1) }
   let!(:expense2) { Expense.create!(description: "Taxi", amount: 50.00, category: transport_category, date: Date.today) }
 
-    it "returns all expenses with category information" do
+    it "returns paginated expenses with metadata" do
       get "/api/expenses"
 
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
-      expect(json.length).to eq(2)
+      expect(json["expenses"].length).to eq(2)
+      expect(json["total_count"]).to eq(2)
+      expect(json["page"]).to eq(1)
+      expect(json["per_page"]).to eq(10)
+      expect(json["total_pages"]).to eq(1)
     end
 
-    it "returns expenses in descending order by date" do
+    it "returns expenses in descending order by date and created_at" do
       get "/api/expenses"
 
       json = JSON.parse(response.body)
-      expect(json.first["id"]).to eq(expense2.id)
-      expect(json.last["id"]).to eq(expense1.id)
+      expect(json["expenses"].first["id"]).to eq(expense2.id)
+      expect(json["expenses"].last["id"]).to eq(expense1.id)
+    end
+
+    it "supports pagination parameters" do
+      get "/api/expenses", params: { page: 1, per_page: 1 }
+
+      json = JSON.parse(response.body)
+      expect(json["expenses"].length).to eq(1)
+      expect(json["page"]).to eq(1)
+      expect(json["per_page"]).to eq(1)
+      expect(json["total_pages"]).to eq(2)
     end
   end
 

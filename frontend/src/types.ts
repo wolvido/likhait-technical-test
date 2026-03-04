@@ -7,6 +7,7 @@ export interface Expense {
   amount: number;
   description: string;
   category: string;
+  category_id: number;
   date: string;
   created_at: string;
   updated_at: string;
@@ -16,6 +17,7 @@ export interface ExpenseFormData {
   amount: string;
   description: string;
   category: string;
+  category_id?: number;
   date: string;
 }
 
@@ -46,6 +48,14 @@ export interface TopCategory {
   category: string;
   total: number;
   count: number;
+}
+
+export interface PaginatedExpensesResponse {
+  expenses: Expense[];
+  total_count: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
 }
 
 export interface DayExpenses {
